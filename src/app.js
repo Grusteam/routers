@@ -4,14 +4,37 @@ import './styles/styles.css';
 /*tools*/
 import _ from 'lodash';
 
-/*react*/
-import React, { Component, PureComponent, createElement } from 'react';
-import ReactDOM, { render, createPortal } from 'react-dom';
 
-/*components*/
-import ReduxApp from './react-app/ReduxApp';
+const
+    navigate = (path) => {
+        const current = window.location.href;
+        window.location.href = current.replace(/#(.*)$/, '') + '#' + path;
+    },
+    getHash = () => window.location.hash.split('#')[1] || '',
+    listen = () => {
+        const current = getHash();
 
-/* react container in layout */
-const reactRoot = document.getElementById('react-root');
-	
-render(<ReduxApp/>, reactRoot);
+        if (current !== currentUrl) makeChanges(currentUrl, current);
+
+        currentUrl = current;
+
+        setTimeout(listen, 200);
+    },
+    makeChanges = (prevUrl, newUrl) => {
+        console.log('makeChanges => prevUrl, newUrl', prevUrl, newUrl);
+    };
+
+let currentUrl = getHash();
+
+console.log('currentUrl', currentUrl);
+
+
+listen();
+
+/* setTimeout(() => {
+    navigate(555);
+}, 1000);
+
+setTimeout(() => {
+    navigate(777);
+}, 5000); */
