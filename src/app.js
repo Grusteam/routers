@@ -4,37 +4,39 @@ import './styles/styles.css';
 /*tools*/
 import _ from 'lodash';
 
+window.addEventListener('popstate', (e) => {
+    console.log('history', history);
+}, false);
 
-const
-    navigate = (path) => {
-        const current = window.location.href;
-        window.location.href = current.replace(/#(.*)$/, '') + '#' + path;
-    },
-    getHash = () => window.location.hash.split('#')[1] || '',
-    listen = () => {
-        const current = getHash();
+document.querySelectorAll('#back')[0].addEventListener('click', (e) => {
+    history.back();
 
-        if (current !== currentUrl) makeChanges(currentUrl, current);
+    console.log('back');
+}, false);
 
-        currentUrl = current;
+document.querySelectorAll('#forward')[0].addEventListener('click', (e) => {
+    history.forward();
 
-        setTimeout(listen, 200);
-    },
-    makeChanges = (prevUrl, newUrl) => {
-        console.log('makeChanges => prevUrl, newUrl', prevUrl, newUrl);
-    };
+    console.log('forward');
+}, false);
 
-let currentUrl = getHash();
+document.querySelectorAll('#test1')[0].addEventListener('click', (e) => {
+    history.pushState(null, '', 'test1');
 
-console.log('currentUrl', currentUrl);
+    console.log('test1');
+}, false);
 
+document.querySelectorAll('#test2')[0].addEventListener('click', (e) => {
+    console.log('test2');
+}, false);
 
-listen();
+const stateObj = { foo: "bar" };
 
 /* setTimeout(() => {
-    navigate(555);
-}, 1000);
+    history.pushState(stateObj, '', 'path');
+}, 1500);
 
 setTimeout(() => {
-    navigate(777);
-}, 5000); */
+    console.log('window.history', window.history);
+}, 2000);
+ */
