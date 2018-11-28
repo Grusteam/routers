@@ -1,0 +1,11 @@
+{
+	"title": "Webpack project",
+	"list": [
+		"<code>Watch mode</code> auto reload page after any changes in project files",
+		"<code>HTML engine</code> all static pages should be placed in <code>/src</code> folder with <code>.html</code> extension",
+		"<code>Public files engine</code> files which should be available in root of the site need to place in <code>/src/public</code> folder",
+		"<code>Template engine</code> <a href=\"https://lodash.com/docs/4.17.5#template\">https://lodash.com/docs/4.17.5#template</a>",
+		"<code>post-css</code> parser (use scss syntax for editor) allows to use modern CSS syntax like variables, nesting etc",
+		"<code>ES6 syntax</code> available to use in all js files. <br/> <b>All js modules should be placed in <code>/src/js</code> folder and imported in <code>app</code> file (entry point)</b>"
+	]
+}
