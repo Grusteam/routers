@@ -4,6 +4,103 @@ import './styles/styles.css';
 /*tools*/
 import _ from 'lodash';
 
+import routerCreator, {  } from './router';
+
+const allRoutes = [
+    'parameters',
+];
+
+const templates = {
+    button: route => `<button id="${route}">${route}</button>`,
+    link: route => `<a id="${route}" href='${route}'>${route}</a>`,
+};
+
+let ROUTER;
+
+/* DOMReady */
+document.addEventListener("DOMContentLoaded", () => {
+    ROUTER = routerCreator('/', allRoutes);
+
+    window.back = () => history.back(),
+    window.forward = () => history.forward();
+});
+
+setTimeout(() => {
+    const
+        { parseHash, navigate, locate } = ROUTER;
+
+        // navigate('loop');
+
+        console.log('locate()', locate('last'));
+}, 1000);
+
+const
+    links = Array.from(document.querySelectorAll('#links')),
+    buttons = Array.from(document.querySelectorAll('#buttons'));
+
+console.log('links, buttons', links, buttons);
+
+allRoutes.forEach(route => {
+    console.log('route', route);
+    links
+    buttons
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+
+
+
+
+
+
+
 window.addEventListener('popstate', (e) => {
     console.log('history', history);
 }, false);
@@ -50,15 +147,6 @@ document.querySelectorAll('#test5')[0].addEventListener('click', (e) => {
 
 const stateObj = { foo: "bar" };
 
-/* setTimeout(() => {
-    history.pushState(stateObj, '', 'path');
-}, 1500);
-
-setTimeout(() => {
-    console.log('window.history', window.history);
-}, 2000);
- */
-
 const parseHash = hash => {
     const
         setup = {},
@@ -79,4 +167,4 @@ const parseHash = hash => {
 
 const setup = parseHash(window.location.hash);
 
-console.log('setup', setup);
+*/
