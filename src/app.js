@@ -4,47 +4,65 @@ import './styles/styles.css';
 /*tools*/
 import _ from 'lodash';
 
-import routerCreator, {  } from './router';
+import createRouter, {  } from './router';
+import DOM_UTILS, { append } from './dom';
 
 const allRoutes = [
     'parameters',
+    'floor',
 ];
-
-const templates = {
-    button: route => `<button id="${route}">${route}</button>`,
-    link: route => `<a id="${route}" href='${route}'>${route}</a>`,
-};
 
 let ROUTER;
 
 /* DOMReady */
 document.addEventListener("DOMContentLoaded", () => {
-    ROUTER = routerCreator('/', allRoutes);
+    initRouter();
 
     window.back = () => history.back(),
     window.forward = () => history.forward();
 });
 
-setTimeout(() => {
-    const
-        { parseHash, navigate, locate } = ROUTER;
-
-        // navigate('loop');
-
-        console.log('locate()', locate('last'));
-}, 1000);
-
 const
-    links = Array.from(document.querySelectorAll('#links')),
-    buttons = Array.from(document.querySelectorAll('#buttons'));
+    links = Array.from(document.querySelectorAll('#links'))[0],
+    buttons = Array.from(document.querySelectorAll('#buttons'))[0];
 
-console.log('links, buttons', links, buttons);
+/* CLIENT_ROUTER */
+const initRouter = (Router = window.CLIENT_ROUTER) => {
+    ROUTER = createRouter();
 
-allRoutes.forEach(route => {
-    console.log('route', route);
-    links
-    buttons
-});
+    const {  } = ROUTER;
+
+    setTimeout(() => {
+        ROUTER.go('test');
+    }, 2000);
+
+}
+
+/* ___ */
+
+const addElements = () => {
+    const templates = {
+        button: route => `<button id="${route}">${route}</button>`,
+        link: route => `<a id="${route}" href='${route}'>${route}</a>`,
+    };
+
+    allRoutes.forEach(route => {
+        const
+            code = templates.button(route),
+            link = append(links, code);
+
+        // console.log('route, link', route, link);
+
+        link.addEventListener('click', (e) => {
+            const { parseHash, navigate, locate } = ROUTER;
+
+            // console.log('route', route);
+
+            return navigate(route);
+        }, false);
+    });
+}
+
 
 
 
