@@ -11,11 +11,20 @@ class Router {
 		this.entryPoint = this.locate();
 		this.initRoutesMutate(this.entryPoint.path);
 		this.handleLinks();
+
+		this.hashHandledFields = this.setHashHandledFields('data-handled');
 	}
-	
 
 	dqsa(s, container = document) {
-		return Array.from(container.querySelectorAll(s));
+		let result = [];
+
+		try {
+			result = Array.from(container.querySelectorAll(s));
+		} catch (error) {
+			console.log('dqsa error', error);
+		}
+
+		return result;
 	}
 
 	dqsa0(s) {
@@ -23,9 +32,25 @@ class Router {
 	}
 
 	go(route = '/', routes = this.routes) {
-		window.history.pushState(null, '', route);
+		const appliedParams = this.addHash(route);
+
+		window.history.pushState(null, '', appliedParams);
 
 		this.setActive(this.getRouteIndex(route));
+
+	}
+
+	setHashHandledFields(mask = 'data-handled') {
+		const
+			arr = this.dqsa(this.dataAttrWrap(mask)),
+			habledFields = [];
+		
+		arr.forEach(field => {
+			this.hashHandle(field);
+			habledFields.push(field);
+		});
+
+		return habledFields;
 	}
 
 	dataSelect(name) {
@@ -132,9 +157,88 @@ class Router {
 		return this.dqsa('a', selector);
 	}
 
+	hashHandle(input) {
+		if (!input) return;
+
+		input.addEventListener('input', this.handleInputChange.bind(this));
+	}
+
+	setWholeHash(pair, hash = window.location.hash) {
+		const currentHash = this.parseHash();
+
+		console.log('currentHash', currentHash);
+	}
+
+	handleInputChange(e) {
+		const
+			{ target } = e,
+			{ value, id } = target,
+			current = this.addHash();
+
+		console.log('current', current);
+
+		window[`__HANDLED_${id}`] = value;
+
+		// this.setHashField(`${id}=${value}`);
+		// this.setHashField({[id]: value});
+		this.applyHash(current);
+	}
+
+	applyHash(hash){
+		history.replaceState(null, null, `${this.locate('pathname')}${hash}`);
+		// window.history.pushState(null, '', hash);
+	}
+
+	addHash(route = '') {
+		let applied = route;
+
+		this.hashHandledFields.forEach((field, i) => {
+			const { value, id } = field;
+			
+			if (i === 0) {
+				applied += '?'
+			} else {
+				applied += '&'
+			}
+
+			applied += `${id}=${value}`
+		});
+
+		return applied;
+	}
+
+	setHashField(val) {
+		const
+			current = this.locate(),
+			{ param } = current,
+			{ state } = window.history,
+			newState = Object.assign({}, state, val),
+			paramString = this.getParamString(param, newState);
+
+		history.pushState(newState, null, `${current.pathname}?${paramString}`);
+	}
+
+	getParamString(oldString= '', obj = {}) {
+		const currentState = this.parseHash(oldString);
+
+		let str = '';
+
+		for (const key in obj) {
+			if (str.includes(key)) {
+
+			} else {
+
+			}
+			
+			str += `${str.length ? '&' : ''}${key}=${obj[key]}`
+		}
+
+		return str;
+	}
+
 	locate(param) {
 		const
-			pathname = window.location.pathname,
+			{ pathname, search } = window.location,
 			pathTrunc = pathname.substr(1),
 			pathArr = pathTrunc.split('/'),
 			depth = pathArr.length,
@@ -145,6 +249,7 @@ class Router {
 				last,
 				depth,
 				pathname,
+				param: search,
 			},
 			result = param && setup[param] ? setup[param] : setup;
 
@@ -175,14 +280,15 @@ class Router {
 		return el.classList ? el.classList.contains(_class) : false;
 	}
 
-	parseHash(hash = window.location.hash) {
+	parseHash(param = window.location.search) {
 		const
+			separators = ['#', '?', '&'],
 			_iterable = [],
 			setup = {
 				_iterable
 			},
-			sub = hash[0] === '#' ? hash.substr(1) : hash,
-			prePairs = sub.split('#'),
+			sub = separators.includes(param[0]) ? param.substr(1) : param,
+			prePairs = sub.split('&'),
 			pairs = prePairs[0].length ? prePairs : [];
 
 		pairs.forEach(value => {

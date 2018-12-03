@@ -26,6 +26,13 @@ const
     links = Array.from(document.querySelectorAll('#links'))[0],
     buttons = Array.from(document.querySelectorAll('#buttons'))[0];
 
+/* first level debug> */
+/* console.log( window.location.href );
+window.history.replaceState( {} , 'foo', '/foo' );
+console.log( window.location.href );
+throw new Error(`I do not whant to execute js more!`); */
+/* <first level debug */
+
 /* CLIENT_ROUTER */
 const initRouter = (Router = window.CLIENT_ROUTER) => {
     ROUTER = createRouter('data-route');
@@ -39,7 +46,6 @@ const initRouter = (Router = window.CLIENT_ROUTER) => {
 }
 
 /* ___ */
-
 const addElements = () => {
     const templates = {
         button: route => `<button id="${route}">${route}</button>`,
