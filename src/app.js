@@ -28,13 +28,13 @@ const
 
 /* CLIENT_ROUTER */
 const initRouter = (Router = window.CLIENT_ROUTER) => {
-    ROUTER = createRouter();
+    ROUTER = createRouter('data-route');
 
     const {  } = ROUTER;
 
-    setTimeout(() => {
-        ROUTER.go('test');
-    }, 2000);
+    // setTimeout(() => {
+    //     ROUTER.go('test');
+    // }, 2000);
 
 }
 

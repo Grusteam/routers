@@ -1,13 +1,16 @@
 const _U = 'undefined';
 
 class Router {
-	constructor(containerSelector, routeClass) {
-		this.routeClass = routeClass || `route`;
+	constructor(routeSelector, containerSelector) {
+		this.routeSelector = routeSelector || `.route`;
 		this.containerSelector = containerSelector || `#routes`;
 		this.visibilityClass = `is-active`;
 
-		[this.routes, this.container] = this.getRoutes(containerSelector, routeClass);
-		this.initRoutesMutate();
+		[this.routes, this.container] = this.getRoutes(containerSelector, routeSelector);
+
+		this.entryPoint = this.locate();
+		this.initRoutesMutate(this.entryPoint.path);
+		this.handleLinks();
 	}
 	
 
@@ -22,11 +25,7 @@ class Router {
 	go(route = '/', routes = this.routes) {
 		window.history.pushState(null, '', route);
 
-		const
-			el = this.dataSelect(route),
-			i = this.getRouteIndex(el);
-
-		this.setActive(i);
+		this.setActive(this.getRouteIndex(route));
 	}
 
 	dataSelect(name) {
@@ -34,10 +33,22 @@ class Router {
 	}
 
 	getRouteIndex(route = this.routes[0], routes = this.routes) {
-		return Array.prototype.indexOf.call(routes, route);
+		let selector = '';
+
+		const
+			selectors = ['#', '.'],
+			prefix = selectors.indexOf(route[0]);
+
+		if (prefix >= 0) {
+			selector = this.dqsa0(route);
+		} else {
+			selector = this.dqsa0(this.dataAttrWrap(route, this.routeSelector));
+		}
+
+		return Array.prototype.indexOf.call(routes, selector);
 	}
 
-	getRoutes(containerSelector = this.containerSelector, routeSelector = `.${this.routeClass}`) {
+	getRoutes(routeSelector = `${this.dataAttrWrap(this.routeSelector)}`, containerSelector = `${this.containerSelector}`) {
 		const
 			container = this.dqsa0(containerSelector),
 			inContainer = this.dqsa(routeSelector, container),
@@ -51,33 +62,48 @@ class Router {
 		return result;
 	}
 
+	dataAttrWrap(param_1, param_2){
+		let full = '';
+
+		if (param_1 && param_1.includes('data-')) {
+			full = `[${param_1}]`;
+		} else {
+			full = `[${param_2}="${param_1}"]`; 
+		}
+
+		return full;
+	}
+
 	initRoutesMutate(activeRouteSelector = '', routes = this.routes) {
 		const selectors = ['#', '.'];
 
 		let activeRouteIndex;
 
+		const routeIndex = this.getRouteIndex(activeRouteSelector);
+
 
 		if (typeof activeRouteSelector === 'number') {
 			activeRouteIndex = activeRouteSelector;
 
+		} else if (routeIndex >= 0) {
+			activeRouteIndex = routeIndex;
 		} else {
-			if (activeRouteSelector[0] && !selectors.includes(activeRouteSelector[0])) { console.log('initRoutesMutate => wrong selector'); return; }
+			/* if (activeRouteSelector[0] && !selectors.includes(activeRouteSelector[0])) { console.log('initRoutesMutate => wrong selector'); return; }
 
 			const
 				activeRouteSet = activeRouteSelector ? this.dqsa(activeRouteSelector) : null,
 				activeRoute = activeRouteSet && activeRouteSet.length ? activeRouteSet[0] : null;
 
-			activeRouteIndex = activeRoute ? this.getRouteIndex(activeRoute) : 0;
+			activeRouteIndex = activeRoute ? this.getRouteIndex(activeRoute) : 0; */
 		}
 
+		this.setActive(activeRouteIndex);
+	}
 
+	setActive(activeRouteIndex, routes = this.routes) {
 		routes.forEach((route, i) => {
 			route.classList && route.classList[i === activeRouteIndex ? 'add' : 'remove'](this.visibilityClass);
 		});
-	}
-
-	setActive(selector) {
-		this.initRoutesMutate(selector);
 	}
 
 	destroy() {
@@ -86,6 +112,24 @@ class Router {
 
 	navigate(route) {
 		 window.history.pushState(null, '', route);
+	}
+
+	handleLinks(links = this.getLinks(document)) {
+		links.forEach((link, b, c) => {
+			const
+				{ href } = link,
+				relHref = link.getAttribute('href');
+
+			link.addEventListener('click', (e) => {
+				e.preventDefault();
+
+				this.go(relHref);
+			});
+		});
+	}
+
+	getLinks(selector = document) {
+		return this.dqsa('a', selector);
 	}
 
 	locate(param) {
@@ -102,7 +146,7 @@ class Router {
 				depth,
 				pathname,
 			},
-			result = param && setup[param] ? setup[param] : pathname;
+			result = param && setup[param] ? setup[param] : setup;
 
 		return result;
 	}
