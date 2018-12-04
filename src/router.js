@@ -12,6 +12,8 @@ class Router {
 		this.initRoutesMutate(this.entryPoint.path);
 		this.handleLinks();
 
+		this.initFragmentState = this.parseHash();
+
 		this.hashHandledFields = this.setHashHandledFields('data-handled');
 	}
 
@@ -21,14 +23,17 @@ class Router {
 		try {
 			result = Array.from(container.querySelectorAll(s));
 		} catch (error) {
-			console.log('dqsa error', error);
+			console.log('dqsa error', error,);
+			console.log('s, container', s, container);
 		}
 
 		return result;
 	}
 
 	dqsa0(s) {
-		return this.dqsa(s)[0];
+		const all = this.dqsa(s);
+
+		return all[0];
 	}
 
 	go(route = '/', routes = this.routes) {
@@ -40,6 +45,16 @@ class Router {
 
 	}
 
+	applyInputValueFromHash(field, fragment = this.initFragmentState) {
+		if (!field || !fragment) return;
+
+		const { id } = field;
+
+		if (fragment[id]) {
+			field.value = fragment[id];
+		}
+	}
+
 	setHashHandledFields(mask = 'data-handled') {
 		const
 			arr = this.dqsa(this.dataAttrWrap(mask)),
@@ -48,6 +63,8 @@ class Router {
 		arr.forEach(field => {
 			this.hashHandle(field);
 			habledFields.push(field);
+
+			this.applyInputValueFromHash(field);
 		});
 
 		return habledFields;
@@ -132,7 +149,7 @@ class Router {
 	}
 
 	destroy() {
-		window.CLIENT_ROUTER = null;
+		window.__CLIENT_ROUTER = null;
 	}
 
 	navigate(route) {
@@ -161,12 +178,6 @@ class Router {
 		if (!input) return;
 
 		input.addEventListener('input', this.handleInputChange.bind(this));
-	}
-
-	setWholeHash(pair, hash = window.location.hash) {
-		const currentHash = this.parseHash();
-
-		console.log('currentHash', currentHash);
 	}
 
 	handleInputChange(e) {
@@ -219,8 +230,6 @@ class Router {
 	}
 
 	getParamString(oldString= '', obj = {}) {
-		const currentState = this.parseHash(oldString);
-
 		let str = '';
 
 		for (const key in obj) {
@@ -306,6 +315,7 @@ class Router {
 
 			setup[key] = val;
 			setup._iterable.push({[key]: val});
+			setup._length = setup._iterable.length;
 		});
 
 		return setup._iterable.length ? setup : null;
@@ -313,11 +323,11 @@ class Router {
 }
 
 const createRouter = (...all) => {
-	if (typeof window.CLIENT_ROUTER === _U) {
-		window.CLIENT_ROUTER = new Router(...all);
+	if (typeof window.__CLIENT_ROUTER === _U) {
+		window.__CLIENT_ROUTER = new Router(...all);
 	}
 	
-	return window.CLIENT_ROUTER;
+	return window.__CLIENT_ROUTER;
 }
 
 export {
@@ -325,3 +335,13 @@ export {
 };
 
 export default createRouter;
+
+
+
+/* 
+setWholeHash(pair, hash = window.location.hash) {
+	const currentHash = this.parseHash();
+}
+
+
+ */

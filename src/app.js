@@ -34,7 +34,7 @@ throw new Error(`I do not whant to execute js more!`); */
 /* <first level debug */
 
 /* CLIENT_ROUTER */
-const initRouter = (Router = window.CLIENT_ROUTER) => {
+const initRouter = () => {
     ROUTER = createRouter('data-route');
 
     const {  } = ROUTER;
