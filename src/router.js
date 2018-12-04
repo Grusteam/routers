@@ -2,21 +2,60 @@ const _U = 'undefined';
 
 class Router {
 	constructor(routeSelector, containerSelector) {
+		/* селекторы */
 		this.routeSelector = routeSelector || `.route`;
 		this.containerSelector = containerSelector || `#routes`;
 		this.visibilityClass = `is-active`;
 
+		/* пройтись по DOM и собрать роуты */
 		[this.routes, this.container] = this.getRoutes(containerSelector, routeSelector);
 
-		this.entryPoint = this.locate();
+		this.entryPoint = this.parseUrl();
+
+		/* установить активный роут */
 		this.initRoutesMutate(this.entryPoint.path);
+
+		/* отследить активный роут */
+		this.checkCurrentRouteMutate(this.entryPoint.path);
+
+		/* перехватить ссылки */
 		this.handleLinks();
 
+		/* изначальное состояние в адресной строке */
 		this.initFragmentState = this.parseHash();
 
+		/* корректные значения инпутов в экземпляре роутера */
+		this.inputValues = {};
+		
+		/* собрать все поля подлежащие отслеживанию и установить обработку*/
 		this.hashHandledFields = this.setHashHandledFields('data-handled');
+
+		/* отслеживать изменение адресной строки */
+		this.handleUrlChanges();
 	}
 
+	getCurrentRoute() {
+		return this.parseUrl('path');
+	}
+	
+	/* обработчик события popstate */
+	handleUrlChanges() {
+		window.onpopstate = (e) => {
+			this.checkCurrentRouteMutate();
+
+			const appliedParams = this.getHash(this.currentRoute);
+
+			this.applyHash();
+
+			this.setActive(this.getRouteIndex(this.currentRoute));
+		}
+	}
+
+	checkCurrentRouteMutate(route = this.getCurrentRoute()) {
+		this.currentRoute = route;
+	}
+
+	/* query selector */
 	dqsa(s, container = document) {
 		let result = [];
 
@@ -36,15 +75,16 @@ class Router {
 		return all[0];
 	}
 
+	/* комплексный метод смены роута */
 	go(route = '/', routes = this.routes) {
-		const appliedParams = this.addHash(route);
+		const appliedParams = this.getHash(route);
 
-		window.history.pushState(null, '', appliedParams);
+		this.navigate(appliedParams);
 
 		this.setActive(this.getRouteIndex(route));
-
 	}
 
+	/* применить значения инпутов из адресной строки */
 	applyInputValueFromHash(field, fragment = this.initFragmentState) {
 		if (!field || !fragment) return;
 
@@ -52,9 +92,11 @@ class Router {
 
 		if (fragment[id]) {
 			field.value = fragment[id];
+			this.inputValues[id] = fragment[id];
 		}
 	}
 
+	/* установить обработку изменений на все поля*/
 	setHashHandledFields(mask = 'data-handled') {
 		const
 			arr = this.dqsa(this.dataAttrWrap(mask)),
@@ -70,10 +112,12 @@ class Router {
 		return habledFields;
 	}
 
+	/* выборка по дата аттрибуту */
 	dataSelect(name) {
 		return this.dqsa0(`[data-route=${name}]`);
 	}
 
+	/* определить индекс роута в общей пачке */
 	getRouteIndex(route = this.routes[0], routes = this.routes) {
 		let selector = '';
 
@@ -90,6 +134,7 @@ class Router {
 		return Array.prototype.indexOf.call(routes, selector);
 	}
 
+	/* парсить роуты в DOM */
 	getRoutes(routeSelector = `${this.dataAttrWrap(this.routeSelector)}`, containerSelector = `${this.containerSelector}`) {
 		const
 			container = this.dqsa0(containerSelector),
@@ -104,6 +149,7 @@ class Router {
 		return result;
 	}
 
+	/* работать с дата аттрибутом */
 	dataAttrWrap(param_1, param_2){
 		let full = '';
 
@@ -116,6 +162,7 @@ class Router {
 		return full;
 	}
 
+	/* непонятный метод */
 	initRoutesMutate(activeRouteSelector = '', routes = this.routes) {
 		const selectors = ['#', '.'];
 
@@ -123,13 +170,13 @@ class Router {
 
 		const routeIndex = this.getRouteIndex(activeRouteSelector);
 
-
 		if (typeof activeRouteSelector === 'number') {
 			activeRouteIndex = activeRouteSelector;
 
 		} else if (routeIndex >= 0) {
 			activeRouteIndex = routeIndex;
 		} else {
+			console.log('initRoutesMutate => 2nd else');
 			/* if (activeRouteSelector[0] && !selectors.includes(activeRouteSelector[0])) { console.log('initRoutesMutate => wrong selector'); return; }
 
 			const
@@ -142,22 +189,26 @@ class Router {
 		this.setActive(activeRouteIndex);
 	}
 
+	/* установить 1 активный роут */
 	setActive(activeRouteIndex, routes = this.routes) {
 		routes.forEach((route, i) => {
 			route.classList && route.classList[i === activeRouteIndex ? 'add' : 'remove'](this.visibilityClass);
 		});
 	}
 
+	/* самоуничтожение */
 	destroy() {
 		window.__CLIENT_ROUTER = null;
 	}
 
-	navigate(route) {
-		 window.history.pushState(null, '', route);
+	/* записать в историю */
+	navigate(route, state = window.history.state, title = '',) {
+		 window.history.pushState(state, 'xxx', route);
 	}
 
-	handleLinks(links = this.getLinks(document)) {
-		links.forEach((link, b, c) => {
+	/* перехватить все ссылки */
+	handleLinks(links = this.getLinks()) {
+		links.forEach((link, i, all) => {
 			const
 				{ href } = link,
 				relHref = link.getAttribute('href');
@@ -174,59 +225,46 @@ class Router {
 		return this.dqsa('a', selector);
 	}
 
+	/* повесить обработчик изменения инпутов => */
 	hashHandle(input) {
 		if (!input) return;
 
 		input.addEventListener('input', this.handleInputChange.bind(this));
 	}
 
+	/* обработчик изменения инпутов =>
+		записывает значение в inputValues и в адресную строку */
 	handleInputChange(e) {
 		const
 			{ target } = e,
-			{ value, id } = target,
-			current = this.addHash();
+			{ value, id } = target;
 
-		console.log('current', current);
-
-		window[`__HANDLED_${id}`] = value;
-
-		// this.setHashField(`${id}=${value}`);
-		// this.setHashField({[id]: value});
-		this.applyHash(current);
+		this.inputValues[id] = value;
+		this.applyHash();
 	}
 
-	applyHash(hash){
-		history.replaceState(null, null, `${this.locate('pathname')}${hash}`);
-		// window.history.pushState(null, '', hash);
+	applyHash(hash = this.getHash(), route = this.getCurrentRoute()){
+		history.replaceState(null, null, `${route}${hash}`);
 	}
 
-	addHash(route = '') {
-		let applied = route;
+	getHash(path = '') {
+		let applied = path;
 
 		this.hashHandledFields.forEach((field, i) => {
 			const { value, id } = field;
-			
-			if (i === 0) {
-				applied += '?'
-			} else {
-				applied += '&'
-			}
 
-			applied += `${id}=${value}`
+			if (value) {
+				if (applied.includes('?')) {
+					applied += '&'
+				} else {
+					applied += '?'
+				}
+			
+				applied += `${id}=${value}`
+			};
 		});
 
 		return applied;
-	}
-
-	setHashField(val) {
-		const
-			current = this.locate(),
-			{ param } = current,
-			{ state } = window.history,
-			newState = Object.assign({}, state, val),
-			paramString = this.getParamString(param, newState);
-
-		history.pushState(newState, null, `${current.pathname}?${paramString}`);
 	}
 
 	getParamString(oldString= '', obj = {}) {
@@ -245,7 +283,8 @@ class Router {
 		return str;
 	}
 
-	locate(param) {
+	/* парсить адресной строку */
+	parseUrl(param) {
 		const
 			{ pathname, search } = window.location,
 			pathTrunc = pathname.substr(1),
@@ -260,7 +299,7 @@ class Router {
 				pathname,
 				param: search,
 			},
-			result = param && setup[param] ? setup[param] : setup;
+			result = param && setup.hasOwnProperty(param) ? setup[param] : setup;
 
 		return result;
 	}
@@ -273,6 +312,7 @@ class Router {
 		el.classList && el.classList['add'](this.visibilityClass);
 	}
 
+	/* инвертировать наличие класса */
 	toggleClass(el = body, _class = this.visibilityClass, propState) {
 		const
 			element = typeof el === 'string' ? this.dqsa0(el) : el,
@@ -289,6 +329,7 @@ class Router {
 		return el.classList ? el.classList.contains(_class) : false;
 	}
 
+	/* изъять параметры из адресной строки */
 	parseHash(param = window.location.search) {
 		const
 			separators = ['#', '?', '&'],
@@ -322,6 +363,9 @@ class Router {
 	}
 }
 
+/* ... . .-. --. . / --.. .... ..- .-. .- ...- .-.. . ...- */
+
+/* инициирующий метод роутера */
 const createRouter = (...all) => {
 	if (typeof window.__CLIENT_ROUTER === _U) {
 		window.__CLIENT_ROUTER = new Router(...all);
@@ -336,12 +380,22 @@ export {
 
 export default createRouter;
 
-
-
 /* 
-setWholeHash(pair, hash = window.location.hash) {
-	const currentHash = this.parseHash();
-}
 
+	setHashField(val) {
+		const
+			current = this.parseUrl(),
+			{ param } = current,
+			{ state } = window.history,
+			newState = Object.assign({}, state, val),
+			paramString = this.getParamString(param, newState);
+
+		this.navigate(`${current.pathname}?${paramString}`, newState);
+
+		//history.pushState(newState, null, `${current.pathname}?${paramString}`);
+	}
+
+	this.setHashField(`${id}=${value}`);
+	this.setHashField({[id]: value});
 
  */
