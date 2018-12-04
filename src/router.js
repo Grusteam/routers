@@ -32,6 +32,8 @@ class Router {
 
 		/* отслеживать изменение адресной строки */
 		this.handleUrlChanges();
+
+		console.assert(Object.keys(this.inputValues).length, 'нет значений');
 	}
 
 	getCurrentRoute() {
@@ -162,11 +164,11 @@ class Router {
 		return full;
 	}
 
-	/* непонятный метод */
+	/* определяемся с активным роутом */
 	initRoutesMutate(activeRouteSelector = '', routes = this.routes) {
 		const selectors = ['#', '.'];
 
-		let activeRouteIndex;
+		let activeRouteIndex = 0;
 
 		const routeIndex = this.getRouteIndex(activeRouteSelector);
 
@@ -177,13 +179,6 @@ class Router {
 			activeRouteIndex = routeIndex;
 		} else {
 			console.log('initRoutesMutate => 2nd else');
-			/* if (activeRouteSelector[0] && !selectors.includes(activeRouteSelector[0])) { console.log('initRoutesMutate => wrong selector'); return; }
-
-			const
-				activeRouteSet = activeRouteSelector ? this.dqsa(activeRouteSelector) : null,
-				activeRoute = activeRouteSet && activeRouteSet.length ? activeRouteSet[0] : null;
-
-			activeRouteIndex = activeRoute ? this.getRouteIndex(activeRoute) : 0; */
 		}
 
 		this.setActive(activeRouteIndex);
@@ -397,5 +392,13 @@ export default createRouter;
 
 	this.setHashField(`${id}=${value}`);
 	this.setHashField({[id]: value});
+
+	if (activeRouteSelector[0] && !selectors.includes(activeRouteSelector[0])) { console.log('initRoutesMutate => wrong selector'); return; }
+
+			const
+				activeRouteSet = activeRouteSelector ? this.dqsa(activeRouteSelector) : null,
+				activeRoute = activeRouteSet && activeRouteSet.length ? activeRouteSet[0] : null;
+
+			activeRouteIndex = activeRoute ? this.getRouteIndex(activeRoute) : 0;
 
  */
