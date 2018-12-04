@@ -13,7 +13,7 @@ class Router {
 		this.entryPoint = this.parseUrl();
 
 		/* установить активный роут */
-		this.initRoutesMutate(this.entryPoint.path);
+		this.setActive(this.getRouteIndex(this.entryPoint.path));
 
 		/* отследить активный роут */
 		this.checkCurrentRouteMutate(this.entryPoint.path);
@@ -120,20 +120,25 @@ class Router {
 	}
 
 	/* определить индекс роута в общей пачке */
-	getRouteIndex(route = this.routes[0], routes = this.routes) {
-		let selector = '';
+	getRouteIndex(selector, routes = this.routes) {
+		if (typeof selector === _U) return -1;
+		if (typeof selector === 'string' && (selector === '' || selector === '/')) return 0;
+
+		let el;
 
 		const
 			selectors = ['#', '.'],
-			prefix = selectors.indexOf(route[0]);
+			prefix = selectors.indexOf(selector[0]);
 
 		if (prefix >= 0) {
-			selector = this.dqsa0(route);
+			el = this.dqsa0(selector);
 		} else {
-			selector = this.dqsa0(this.dataAttrWrap(route, this.routeSelector));
+			el = this.dqsa0(this.dataAttrWrap(selector, this.routeSelector));
 		}
 
-		return Array.prototype.indexOf.call(routes, selector);
+		const i = Array.prototype.indexOf.call(routes, el);
+		
+		return i;
 	}
 
 	/* парсить роуты в DOM */
@@ -164,28 +169,12 @@ class Router {
 		return full;
 	}
 
-	/* определяемся с активным роутом */
-	initRoutesMutate(activeRouteSelector = '', routes = this.routes) {
-		const selectors = ['#', '.'];
-
-		let activeRouteIndex = 0;
-
-		const routeIndex = this.getRouteIndex(activeRouteSelector);
-
-		if (typeof activeRouteSelector === 'number') {
-			activeRouteIndex = activeRouteSelector;
-
-		} else if (routeIndex >= 0) {
-			activeRouteIndex = routeIndex;
-		} else {
-			console.log('initRoutesMutate => 2nd else');
-		}
-
-		this.setActive(activeRouteIndex);
-	}
-
 	/* установить 1 активный роут */
 	setActive(activeRouteIndex, routes = this.routes) {
+		if (activeRouteIndex < 0) {
+			console.log(404);
+		}
+
 		routes.forEach((route, i) => {
 			route.classList && route.classList[i === activeRouteIndex ? 'add' : 'remove'](this.visibilityClass);
 		});
