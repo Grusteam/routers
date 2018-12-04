@@ -156,6 +156,10 @@ class Router {
 		return result;
 	}
 
+	redirect(path = '', state = null, title = '') {
+		history.replaceState(state, title, path);
+	}
+
 	/* работать с дата аттрибутом */
 	dataAttrWrap(param_1, param_2){
 		let full = '';
@@ -172,10 +176,12 @@ class Router {
 	/* установить 1 активный роут */
 	setActive(activeRouteIndex, routes = this.routes) {
 		if (activeRouteIndex < 0) {
+			/* this.redirect(`404`) */
 			console.log(404);
 		}
 
 		routes.forEach((route, i) => {
+			// console.log('route, i, activeRouteIndex', route, i, activeRouteIndex);
 			route.classList && route.classList[i === activeRouteIndex ? 'add' : 'remove'](this.visibilityClass);
 		});
 	}
@@ -228,7 +234,7 @@ class Router {
 	}
 
 	applyHash(hash = this.getHash(), route = this.getCurrentRoute()){
-		history.replaceState(null, null, `${route}${hash}`);
+		this.redirect(`${route}${hash}`);
 	}
 
 	getHash(path = '') {
