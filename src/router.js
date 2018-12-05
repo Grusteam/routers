@@ -4,7 +4,7 @@ class Router {
 	constructor(setup) {
 		this.setup = setup;
 
-		const { routes, routeSelectorMask, routesContainer, containerSelector, linksContainer } = setup;
+		const { routes, routeSelectorMask, routesContainer, containerSelector, linksContainer, linksSelector } = setup;
 
 		this.defaultRoute = 1;
 		this.errorRoute = 0;
@@ -30,7 +30,7 @@ class Router {
 		this.checkCurrentRouteMutate(this.entryPoint.path);
 
 		/* перехватить ссылки */
-		this.handleLinks();
+		this.handleLinks(this.dqsa(linksSelector));
 
 		/* изначальное состояние в адресной строке */
 		this.initFragmentState = this.parseHash();
