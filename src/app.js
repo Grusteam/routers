@@ -35,7 +35,8 @@ throw new Error(`I do not whant to execute js more!`); */
 
 /* CLIENT_ROUTER */
 const initRouter = () => {
-    ROUTER = createRouter({routeSelectorMask: 'data-route', linksSelector: '.route-link'});
+    // ROUTER = createRouter({routeSelectorMask: 'data-route', linksSelector: '.route-link'});
+    ROUTER = createRouter({routeSelectorMask: 'data-route', linksContainer: '#links'});
 
     const {  } = ROUTER;
 

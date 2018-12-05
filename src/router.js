@@ -4,7 +4,7 @@ class Router {
 	constructor(setup) {
 		this.setup = setup;
 
-		const { routes, routeSelectorMask, routesContainer, containerSelector, linksContainer, linksSelector } = setup;
+		const { routes, routeSelectorMask, routesContainer, containerSelector, links, linksContainer, linksSelector } = setup;
 
 		this.defaultRoute = 1;
 		this.errorRoute = 0;
@@ -30,7 +30,8 @@ class Router {
 		this.checkCurrentRouteMutate(this.entryPoint.path);
 
 		/* перехватить ссылки */
-		this.handleLinks(this.dqsa(linksSelector));
+		this.links = links ? links : linksContainer ? this.dqsa0(linksContainer, 'a') : linksSelector ? this.dqsa(`a${linksSelector}`) : []; 
+		this.handleLinks();
 
 		/* изначальное состояние в адресной строке */
 		this.initFragmentState = this.parseHash();
@@ -112,10 +113,28 @@ class Router {
 		return result;
 	}
 
-	dqsa0(s) {
-		const all = this.dqsa(s);
+	dqsa0(s, childsFilter = false) {
+		const
+			all = this.dqsa(s),
+			first = all[0];
 
-		return all[0];
+		if (childsFilter) {
+			const filterNodes = (nodes) => {
+				// console.log('nodes', nodes);
+				return nodes.filter(node => {
+					return (node.tagName && node.tagName.toLowerCase() === childsFilter.toLowerCase());
+				})
+			};
+
+			const
+				childs = first.childNodes,
+				childsArr = Array.from(first.childNodes),
+				filteredNodes = filterNodes(childsArr);
+
+			return filteredNodes;
+		}
+
+		return first;
 	}
 
 	/* комплексный метод смены роута */
