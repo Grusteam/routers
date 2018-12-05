@@ -1,10 +1,10 @@
 Serge Zhuravlev Vanilla SPA Router
 
-1. Import 
+1. Import.
     Import router creator from router.js file.
     import anyNameForRouterCreator from './router';
 
-2. Creation and config
+2. Creation and config.
     Create router with config
     You can pass a container or it selector with all routes or on array with all of them.
 
@@ -16,7 +16,17 @@ Serge Zhuravlev Vanilla SPA Router
 
     After creation it will pemanently stored as a window property (window.__CLIENT_ROUTER)
 
-3. Navigation
+3. Navigation.
     myVeryBestRouter.go('routeName') method allow you to have
     proper navigation inside your SPA.
     You can pass all routing links or links container to intercept click handler on it besides.
+
+3. CSS
+    Please add route selector rule to hide non-active router
+    [data-route] {
+        display: none;
+
+        &.is-active {
+            display: block;
+        }
+    }

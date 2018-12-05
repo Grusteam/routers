@@ -1,13 +1,8 @@
-.root {}
 
+[data-route] {
+    display: none;
 
-#routes {
-
-    .route {
-        display: none;
-
-        &.is-active {
-            display: block;
-        }
+    &.is-active {
+        display: block;
     }
 }

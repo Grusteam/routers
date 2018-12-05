@@ -1,14 +1,25 @@
 const _U = 'undefined';
 
 class Router {
-	constructor(routeSelector, containerSelector) {
+	constructor(setup) {
+		this.setup = setup;
+
+		const { routes, routeSelectorMask, routesContainer, containerSelector, linksContainer } = setup;
+
+		this.defaultRoute = 1;
+		this.errorRoute = 0;
+
+		/* искать вручную по селекторам нужные теги */
+		this.parsedDomSelectors = this.parseDomSelectors();
+
 		/* селекторы */
-		this.routeSelector = routeSelector || `.route`;
-		this.containerSelector = containerSelector || `#routes`;
+		this.routeSelector = this.dataAttrWrap(routeSelectorMask) || `.route`;
+		this.containerSelector = this.dataAttrWrap(containerSelector) || `#routes`;
+		// console.log('this.routeSelector, this.containerSelector', this.routeSelector, this.containerSelector);
 		this.visibilityClass = `is-active`;
 
 		/* пройтись по DOM и собрать роуты */
-		[this.routes, this.container] = this.getRoutes(containerSelector, routeSelector);
+		[this.routes, this.container] = this.getRoutes();
 
 		this.entryPoint = this.parseUrl();
 
@@ -34,6 +45,36 @@ class Router {
 		this.handleUrlChanges();
 
 		console.assert(Object.keys(this.inputValues).length, 'нет значений');
+	}
+
+	parseDomSelectors(container = document) {
+		const
+			iterable = [],
+			keyVal = {},
+			prefixes = ['#', '.', 'data-'],	
+			presumption = [
+				'routes',
+				'route',
+
+			];
+
+		presumption.forEach(body => {
+			prefixes.forEach(prefix => {
+				const
+					selector = prefix.includes('data') ? this.dataSelect(body) : `${prefix}${body}`,
+					{ length } = this.dqsa(selector);
+
+				iterable.push({ length, selector });
+				keyVal[selector] = length;
+			});
+		});
+
+		iterable.sort((a, b) => b.length - a.length);
+
+		return {
+			iterable,
+			keyVal,
+		};
 	}
 
 	getCurrentRoute() {
@@ -114,35 +155,31 @@ class Router {
 		return habledFields;
 	}
 
-	/* выборка по дата аттрибуту */
-	dataSelect(name) {
-		return this.dqsa0(`[data-route=${name}]`);
-	}
-
 	/* определить индекс роута в общей пачке */
 	getRouteIndex(selector, routes = this.routes) {
-		if (typeof selector === _U) return -1;
-		if (typeof selector === 'string' && (selector === '' || selector === '/')) return 0;
+		if (typeof selector === _U) return 0;
+		if (typeof selector === 'string' && (selector === '' || selector === '/')) {
+			return this.errorRoute === 0 ? this.errorRoute + 1 : this.defaultRoute;
+		};
 
-		let el;
 
 		const
-			selectors = ['#', '.'],
-			prefix = selectors.indexOf(selector[0]);
+			prefixes = ['#', '.'],
+			prefix = prefixes.indexOf(selector[0]);
 
-		if (prefix >= 0) {
-			el = this.dqsa0(selector);
-		} else {
-			el = this.dqsa0(this.dataAttrWrap(selector, this.routeSelector));
-		}
+		const
+			completeSelector = this.dataAttrWrap(this.routeSelector, selector),
+			el = this.dqsa0(completeSelector);
+
 
 		const i = Array.prototype.indexOf.call(routes, el);
+		console.assert(i >= 0, 404);
 		
 		return i;
 	}
 
 	/* парсить роуты в DOM */
-	getRoutes(routeSelector = `${this.dataAttrWrap(this.routeSelector)}`, containerSelector = `${this.containerSelector}`) {
+	getRoutes(routeSelector = this.routeSelector, containerSelector = this.containerSelector) {
 		const
 			container = this.dqsa0(containerSelector),
 			inContainer = this.dqsa(routeSelector, container),
@@ -159,30 +196,52 @@ class Router {
 	redirect(path = '', state = null, title = '') {
 		history.replaceState(state, title, path);
 	}
+	
+	/* выборка по дата аттрибуту */
+	dataSelect(name = 'route', val = '') {
+		return `[data-${name}${val ? `=${val}` : ''}]`;
+	}
 
 	/* работать с дата аттрибутом */
-	dataAttrWrap(param_1, param_2){
-		let full = '';
+	dataAttrWrap(dataParam = '', paramVal = ''){
+		let
+			full = '',
+			cleanDataParam = dataParam;
 
-		if (param_1 && param_1.includes('data-')) {
-			full = `[${param_1}]`;
-		} else {
-			full = `[${param_2}="${param_1}"]`; 
+		if (cleanDataParam && cleanDataParam.includes) {
+			if (cleanDataParam, paramVal) {
+				if (cleanDataParam.includes('[') && cleanDataParam.includes(']')) {
+					cleanDataParam = cleanDataParam.replace('[', '').replace(']', '');
+				}
+			}
+
+			if (!cleanDataParam.includes('data-')) {
+				return cleanDataParam;
+			}
+
+			if (paramVal) {
+				full = `${cleanDataParam}="${paramVal}"`;
+
+			} else {
+				full = `${cleanDataParam}`;
+			}
 		}
 
+
+		if (full.length && !(full.includes('[') && full.includes(']'))) {
+			full = `[${full}]`;
+		}
 		return full;
 	}
 
 	/* установить 1 активный роут */
-	setActive(activeRouteIndex, routes = this.routes) {
-		if (activeRouteIndex < 0) {
-			/* this.redirect(`404`) */
-			console.log(404);
-		}
+	setActive(index = 0, routes = this.routes) {
+		const correctedActiveRouteIndex = index < 1 ?
+			typeof this.errorRoute !== _U ? this.errorRoute :
+				this.defaultRoute : index;
 
 		routes.forEach((route, i) => {
-			// console.log('route, i, activeRouteIndex', route, i, activeRouteIndex);
-			route.classList && route.classList[i === activeRouteIndex ? 'add' : 'remove'](this.visibilityClass);
+			route.classList && route.classList[i === correctedActiveRouteIndex ? 'add' : 'remove'](this.visibilityClass);
 		});
 	}
 

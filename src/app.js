@@ -35,7 +35,7 @@ throw new Error(`I do not whant to execute js more!`); */
 
 /* CLIENT_ROUTER */
 const initRouter = () => {
-    ROUTER = createRouter('data-route');
+    ROUTER = createRouter({routeSelectorMask: 'data-route', linksSelector: '.route-link'});
 
     const {  } = ROUTER;
 
@@ -46,7 +46,7 @@ const initRouter = () => {
 }
 
 /* ___ */
-const addElements = () => {
+/* const addElements = () => {
     const templates = {
         button: route => `<button id="${route}">${route}</button>`,
         link: route => `<a id="${route}" href='${route}'>${route}</a>`,
@@ -67,7 +67,7 @@ const addElements = () => {
             return navigate(route);
         }, false);
     });
-}
+} */
 
 
 
