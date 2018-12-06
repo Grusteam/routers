@@ -43,34 +43,75 @@ class App extends Component {
 
 				<ul>
 					<li>
+						<Link to={'/'}>
+							home
+						</Link>
+					</li>
+					<li>
+						<Link to={'/params'}>
+							params
+						</Link>
+					</li>
+					<li>
 						<Link to={'/aparts'}>
 							aparts
 						</Link>
 					</li>
-					<li>
-						<Link to={'/aparts/params'}>
-							params
-						</Link>
-					</li>
 				</ul>
-				
-				<Route exact path={'/aparts'} component={Home}>
-				</Route>
 
-				<Route path={'/aparts/params'} component={Params}>
-				</Route>
+				<Switch>
+					<Route
+						exact
+						path={'/'}
+						component={Home}
+					/>
+
+					<Route
+						path={'/params/:param'}
+						component={Params}
+					/>
+
+					<Route
+						path={'/aparts/:param'}
+						component={Aparts}
+					/>
+
+					<Route
+						component={MyError}
+					/>
+				</Switch>
 			</div>
 		</Router>
 	}
 }
 
-const Home = () =>
-    <div>
-      <h2>Home</h2>
-    </div>,
-	Params = () => <div>
-      <h2>Params</h2>
-    </div>;
+const Home = ({ match }) => {
+		console.log('match', match);
+		return <div>
+			<h2>Home</h2>
+		</div>
+	},
+	Params = ({ match }) => {
+		console.log('match', match);
+		return <div>
+			<h2>Params</h2>
+			<h2>{ match.params.param }</h2>
+		</div>
+	},
+	MyError = ({ match }) => {
+		console.log('match', match);
+		return <div>
+			<h2>MyError</h2>
+			<h2>{ match.params.param }</h2>
+		</div>
+	},
+	Aparts = ({ match }) => {
+		console.log('match', match);
+		return <div>
+			<h2>Aparts</h2>
+			<h2>{ match.params.param }</h2>
+		</div>
+	};
 
 /* ... . .-. --. . / --.. .... ..- .-. .- ...- .-.. . ...- */
 
