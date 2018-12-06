@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import { BrowserRouter as Router, Switch, Link, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Switch, NavLink, Route } from 'react-router-dom';
 
 /* redux actions */
 import ACTIONS, {  } from './redux/actions'
@@ -43,19 +43,19 @@ class App extends Component {
 
 				<ul>
 					<li>
-						<Link to={'/'}>
+						<NavLink to={'/'}>
 							home
-						</Link>
+						</NavLink>
 					</li>
 					<li>
-						<Link to={'/params'}>
+						<NavLink to={'/params'}>
 							params
-						</Link>
+						</NavLink>
 					</li>
 					<li>
-						<Link to={'/aparts'}>
+						<NavLink to={'/aparts'}>
 							aparts
-						</Link>
+						</NavLink>
 					</li>
 				</ul>
 
@@ -67,12 +67,12 @@ class App extends Component {
 					/>
 
 					<Route
-						path={'/params/:param'}
+						path={'/params/:param?'}
 						component={Params}
 					/>
 
 					<Route
-						path={'/aparts/:param'}
+						path={'/aparts/:param?'}
 						component={Aparts}
 					/>
 
@@ -85,31 +85,39 @@ class App extends Component {
 	}
 }
 
-const Home = ({ match }) => {
-		console.log('match', match);
+const Home = (all) => {
+		const { history, match: { params: { param } } } = all;
+		// // console.log('all', all);
+		// console.log('match', match);
 		return <div>
 			<h2>Home</h2>
 		</div>
 	},
-	Params = ({ match }) => {
-		console.log('match', match);
+	Params = (all) => {
+		const { history, match: { params: { param } } } = all;
+		// // console.log('all', all);
+		// console.log('match', match);
 		return <div>
 			<h2>Params</h2>
-			<h2>{ match.params.param }</h2>
+			<h2>{ param }</h2>
 		</div>
 	},
-	MyError = ({ match }) => {
-		console.log('match', match);
+	MyError = (all) => {
+		const { history, match: { params: { param } } } = all;
+		// // console.log('all', all);
+		// console.log('match', match);
 		return <div>
 			<h2>MyError</h2>
-			<h2>{ match.params.param }</h2>
+			<h2>{ param }</h2>
 		</div>
 	},
-	Aparts = ({ match }) => {
-		console.log('match', match);
+	Aparts = (all) => {
+		const { history, match: { params: { param } } } = all;
+		// // console.log('all', all);
+		// console.log('match', match);
 		return <div>
 			<h2>Aparts</h2>
-			<h2>{ match.params.param }</h2>
+			<h2>{ param }</h2>
 		</div>
 	};
 
