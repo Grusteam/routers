@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { BrowserRouter as Router, Switch, NavLink, Route } from 'react-router-dom';
+import { extract, parse, parseUrl, stringify } from 'query-string';
 
 /* redux actions */
 import ACTIONS, {  } from './redux/actions'
@@ -12,6 +13,68 @@ import UTILS, {  } from './Utils';
 
 /* components */
 // import Component from './components/Component'
+
+class Full extends Component {
+	constructor(props, context) {
+		super(props);
+
+		const {  } = props; /* redux */
+
+		this.onchange = this.onchange.bind(this);
+	}
+	
+	componentDidMount() {
+		const
+			{ history } = this.props,
+			{ state, search } = history.location,
+			{ input } = this.refs;
+
+		const urlSetup = parse(search);
+
+		/* apply init state in history */
+		history.push({
+			search,
+			state: urlSetup,
+		})
+
+		/* apply values to DOM */
+		for (var id in urlSetup) {
+			const val = urlSetup[id];
+
+			this.refs[id].value = val;
+		}
+	}
+
+	/* ... . .-. --. . / --.. .... ..- .-. .- ...- .-.. . ...- */
+
+	onchange({ target }) {
+		const
+			{ history } = this.props,
+			{ value } = target,
+			id = target.getAttribute('data-identifier');
+
+		history.push({
+			search: `${id}=${value}`,
+			state: { [id]: value }
+		})
+
+		console.log('history', history);
+		// console.log('id', id);
+		console.log('target', target);
+	}
+
+	/* ... . .-. --. . / --.. .... ..- .-. .- ...- .-.. . ...- */
+	
+	render() {
+		return (
+			<div>
+				<h2>Full</h2>
+				<h2>{ 123 }</h2>
+				<input data-identifier="input" onChange={this.onchange} type="text" ref="input"/>
+			</div>
+		)
+	}
+}
 
 /* ... . .-. --. . / --.. .... ..- .-. .- ...- .-.. . ...- */
 
@@ -57,6 +120,11 @@ class App extends Component {
 							aparts
 						</NavLink>
 					</li>
+					<li>
+						<NavLink to={'/full'}>
+							full
+						</NavLink>
+					</li>
 				</ul>
 
 				<Switch>
@@ -69,6 +137,11 @@ class App extends Component {
 					<Route
 						path={'/params/:param?'}
 						component={Params}
+					/>
+
+					<Route
+						path={'/full/:param?'}
+						component={Full}
 					/>
 
 					<Route
@@ -120,6 +193,8 @@ const Home = (all) => {
 			<h2>{ param }</h2>
 		</div>
 	};
+
+
 
 /* ... . .-. --. . / --.. .... ..- .-. .- ...- .-.. . ...- */
 
