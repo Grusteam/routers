@@ -6,7 +6,7 @@ export const
 	setCloudSelectedTags = (nodes) => ({type: 'SET_CLOUD_SELECTED_TAGS', payload: { nodes: [nodes] }}),
 
 /* CONROLLED ELEMENTS */
-	setInputValue = (value) => ({type: 'SET_INPUT_VALUE', payload: { value }}),
+	setInputValue = (id, value) => ({type: 'SET_INPUT_VALUE', payload: { id, value }}),
 
 /* GRAPH */
 	setGraphType = () => ({type: 'SET_GRAPH_TYPE'}),

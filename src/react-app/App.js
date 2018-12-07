@@ -5,7 +5,7 @@ import { BrowserRouter as Router, Switch, NavLink, Route } from 'react-router-do
 import { extract, parse, parseUrl, stringify } from 'query-string';
 
 /* redux actions */
-import ACTIONS, {  } from './redux/actions'
+import ACTIONS, { setInputValue } from './redux/actions'
 
 /* tools */
 import CONSTANTS, {  } from './Constants';
@@ -18,61 +18,124 @@ class Full extends Component {
 	constructor(props, context) {
 		super(props);
 
-		const {  } = props; /* redux */
+		const { setInput } = props; /* redux */
 
 		this.onchange = this.onchange.bind(this);
+		this.applyValuesToUri = this.applyValuesToUri.bind(this);
 	}
 	
 	componentDidMount() {
 		const
+			{ setInput, } = this.props, /* redux actions */
+			{ INPUT_VALUE,  } = this.props, /* redux props */
 			{ history } = this.props,
 			{ state, search } = history.location,
 			{ input } = this.refs;
 
-		const urlSetup = parse(search);
+		this.applyValuesToUri({ INPUT_VALUE, a: 'b' });
+	}
+
+	applyValuesToUri(values) {
+		const
+			{ history } = this.props;
 
 		/* apply init state in history */
 		history.push({
-			search,
-			state: urlSetup,
+			search: this.formFragment(values),
+			state: values,
 		})
+	}
 
-		/* apply values to DOM */
+	formFragment(setup) {
+		let fragment = '';
+
+		/* ecma 2017 */
+		for (const [key, val] of Object.entries(setup)) {
+			if (val) fragment += `${fragment.includes('?') ? '&' : '?'}${key}=${val}`
+		}
+
+		return fragment;
+	}
+
+	applyToDom() {
+		const
+			{ setInput, } = this.props, /* redux actions */
+			{ INPUT_VALUE,  } = this.props, /* redux props */
+			{ history } = this.props;
+
 		for (var id in urlSetup) {
 			const val = urlSetup[id];
 
-			if (this.refs[id]) this.refs[id].value = val;
+			/* via redux */
+			this.applyToRedux(id, val);
+
+			/* via refs */
+			this.applyToRef(id, val);
 		}
+	}
+
+	applyToRedux(id, val) {
+		const { setInput, } = this.props; /* redux actions */
+			
+		setInput(id, val);
+	}
+
+	applyToRef(id, val) {
+		if (this.refs[id]) this.refs[id].value = val;
+	}
+
+	componentDidUpdate(prevProps) {
 	}
 
 	/* ... . .-. --. . / --.. .... ..- .-. .- ...- .-.. . ...- */
 
+	/* input change handler */
 	onchange({ target }) {
 		const
+			{ setInput } = this.props, /* redux */
 			{ history } = this.props,
 			{ value } = target,
 			id = target.getAttribute('data-identifier');
 
+		/* applying input value to uri params */
 		history.push({
 			search: `${id}=${value}`,
 			state: { [id]: value }
+		})
+
+		/* set value in redux */
+		setInput(id, value);
+	}
+
+	goTo(val) {
+		const
+			{ history } = this.props;
+
+		history.push({
+			pathname: val,
+			// search: `${id}=${value}`,
+			// state: { [id]: value }
 		})
 	}
 
 	/* ... . .-. --. . / --.. .... ..- .-. .- ...- .-.. . ...- */
 	
 	render() {
-		const { history, match: { params: { param } } } = this.props;
+		const { INPUT_VALUE, history, match: { params: { param } } } = this.props;
+
+		// console.log('INPUT_VALUE', INPUT_VALUE);
 
 		return (
 			<div>
 				<h2>Full</h2>
 				<h2>{ param }</h2>
-				<input data-identifier="input" onChange={this.onchange} type="text" ref="input"/>
+				<input value={INPUT_VALUE} data-identifier="INPUT_VALUE" onChange={this.onchange} type="text" ref="input"/>
+				<button onClick={()=>this.goTo(this.refs.input.value)}>goTo</button>
 			</div>
 		)
 	}
 }
+
 
 /* ... . .-. --. . / --.. .... ..- .-. .- ...- .-.. . ...- */
 
@@ -86,10 +149,9 @@ class App extends Component {
 	/* ... . .-. --. . / --.. .... ..- .-. .- ...- .-.. . ...- */
 	
 	render() {
-		console.log('history', history);
+		// console.log('history', history);
 
-		const
-			{ INPUT_VALUE } = this.props; /* redux */
+		const { INPUT_VALUE } = this.props; /* redux */
 			
 		return <Router>
 			<div id="app" className="app">
@@ -131,7 +193,7 @@ class App extends Component {
 
 					<Route
 						path={'/full/:param?'}
-						component={Full}
+						component={FullRedux}
 					/>
 
 					<Route
@@ -175,7 +237,7 @@ const
 		};
 	},
 	mapDispatchToProps = dispatch => ({
-		// testActionClick: () => dispatch(testAction()),
+		setInput: (id, val) => dispatch(setInputValue(id, val)),
 	});
 
 const AppRedux = connect(
@@ -183,4 +245,56 @@ const AppRedux = connect(
 	mapDispatchToProps
 )(App);
 
+const FullRedux = connect(
+	mapStateToProps,
+	mapDispatchToProps
+)(Full);
+
 export default AppRedux;
+
+		// const urlSetup = parse(search);
+
+		// /* apply init state in history */
+		// history.push({
+		// 	search,
+		// 	state: urlSetup,
+		// })
+
+
+		// /* apply values to DOM */
+		// for (var id in urlSetup) {
+		// 	const val = urlSetup[id];
+
+		// 	/* via redux */
+		// 	setInput(val);
+
+		// 	/* via refs */
+		// 	// if (this.refs[id]) this.refs[id].value = val;
+		// }
+
+		/* ecma
+
+		console.log(`'x'.padStart(3, 'y')`, 'x'.padStart(3, 'y'));
+		console.log(`'x'.padEnd(3, 'y') `, 'x'.padEnd(3, 'y') );
+
+	var car = {
+		x: 500,
+		get price () {return this.x},
+		set price (p) {this.x = p},
+	};
+
+	var
+		aa = {
+			a: 'a',
+			b: 'b',
+			c: 'c',
+			d: 'd',
+		},
+		{b, ...bb} = aa;
+
+	console.log('bb', bb);
+	console.log('aa', aa);
+
+	console.log('car', car.price);
+
+	 */

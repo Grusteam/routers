@@ -22,7 +22,8 @@ const store = createStore(
 	getInitialState(reduxStoreSetup),
 	compose(
 		// applyMiddleware(thunk),
-		window.devToolsExtension ? window.devToolsExtension() : f => f
+		// window.devToolsExtension ? window.devToolsExtension() : f => f, //устревшая версия
+		window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__(),
 	),
 );
 

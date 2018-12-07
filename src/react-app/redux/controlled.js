@@ -6,14 +6,16 @@ const controlled = (state = {}, { type, payload = {} }) => {
 	// console.log('state, type, payload', state, type, payload);
 
 	const { 
+		id = '',
 		value = '',
 	} = payload;
 	
 	switch (type) {
 		
 		case 'SET_INPUT_VALUE':
+		// console.log('value', value);
 			return { ...state,
-				'INPUT_VALUE': value,
+				[id]: value,
 			};
 		
 		/* ... . .-. --. . / --.. .... ..- .-. .- ...- .-.. . ...- */
