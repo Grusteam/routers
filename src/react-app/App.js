@@ -33,26 +33,6 @@ class Full extends Component {
 			{ input } = this.refs;
 
 		this.applyValuesToUri({ INPUT_VALUE, a: 'b' });
-
-		// const urlSetup = parse(search);
-
-		// /* apply init state in history */
-		// history.push({
-		// 	search,
-		// 	state: urlSetup,
-		// })
-
-
-		// /* apply values to DOM */
-		// for (var id in urlSetup) {
-		// 	const val = urlSetup[id];
-
-		// 	/* via redux */
-		// 	setInput(val);
-
-		// 	/* via refs */
-		// 	// if (this.refs[id]) this.refs[id].value = val;
-		// }
 	}
 
 	applyValuesToUri(values) {
@@ -69,9 +49,8 @@ class Full extends Component {
 	formFragment(setup) {
 		let fragment = '';
 
-		for (var key in setup) {
-			const val = setup[key];
-
+		/* ecma 2017 */
+		for (const [key, val] of Object.entries(setup)) {
 			if (val) fragment += `${fragment.includes('?') ? '&' : '?'}${key}=${val}`
 		}
 
@@ -272,3 +251,50 @@ const FullRedux = connect(
 )(Full);
 
 export default AppRedux;
+
+		// const urlSetup = parse(search);
+
+		// /* apply init state in history */
+		// history.push({
+		// 	search,
+		// 	state: urlSetup,
+		// })
+
+
+		// /* apply values to DOM */
+		// for (var id in urlSetup) {
+		// 	const val = urlSetup[id];
+
+		// 	/* via redux */
+		// 	setInput(val);
+
+		// 	/* via refs */
+		// 	// if (this.refs[id]) this.refs[id].value = val;
+		// }
+
+		/* ecma
+
+		console.log(`'x'.padStart(3, 'y')`, 'x'.padStart(3, 'y'));
+		console.log(`'x'.padEnd(3, 'y') `, 'x'.padEnd(3, 'y') );
+
+	var car = {
+		x: 500,
+		get price () {return this.x},
+		set price (p) {this.x = p},
+	};
+
+	var
+		aa = {
+			a: 'a',
+			b: 'b',
+			c: 'c',
+			d: 'd',
+		},
+		{b, ...bb} = aa;
+
+	console.log('bb', bb);
+	console.log('aa', aa);
+
+	console.log('car', car.price);
+
+	 */
