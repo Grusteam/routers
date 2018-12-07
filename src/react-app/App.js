@@ -41,7 +41,7 @@ class Full extends Component {
 		for (var id in urlSetup) {
 			const val = urlSetup[id];
 
-			this.refs[id].value = val;
+			if (this.refs[id]) this.refs[id].value = val;
 		}
 	}
 
@@ -57,19 +57,17 @@ class Full extends Component {
 			search: `${id}=${value}`,
 			state: { [id]: value }
 		})
-
-		console.log('history', history);
-		// console.log('id', id);
-		console.log('target', target);
 	}
 
 	/* ... . .-. --. . / --.. .... ..- .-. .- ...- .-.. . ...- */
 	
 	render() {
+		const { history, match: { params: { param } } } = this.props;
+
 		return (
 			<div>
 				<h2>Full</h2>
-				<h2>{ 123 }</h2>
+				<h2>{ param }</h2>
 				<input data-identifier="input" onChange={this.onchange} type="text" ref="input"/>
 			</div>
 		)
@@ -85,14 +83,11 @@ class App extends Component {
 		const {  } = props; /* redux */
 	}
 	
-	componentWillReceiveProps({ STEP }) {
-		if (false) {
-		}
-	}
-	
 	/* ... . .-. --. . / --.. .... ..- .-. .- ...- .-.. . ...- */
 	
 	render() {
+		console.log('history', history);
+
 		const
 			{ INPUT_VALUE } = this.props; /* redux */
 			
@@ -102,7 +97,7 @@ class App extends Component {
 					App
 				</p>
 
-				{ INPUT_VALUE }
+				<p>INPUT_VALUE - { INPUT_VALUE }</p>
 
 				<ul>
 					<li>
@@ -113,11 +108,6 @@ class App extends Component {
 					<li>
 						<NavLink to={'/params'}>
 							params
-						</NavLink>
-					</li>
-					<li>
-						<NavLink to={'/aparts'}>
-							aparts
 						</NavLink>
 					</li>
 					<li>
@@ -145,11 +135,6 @@ class App extends Component {
 					/>
 
 					<Route
-						path={'/aparts/:param?'}
-						component={Aparts}
-					/>
-
-					<Route
 						component={MyError}
 					/>
 				</Switch>
@@ -160,16 +145,12 @@ class App extends Component {
 
 const Home = (all) => {
 		const { history, match: { params: { param } } } = all;
-		// // console.log('all', all);
-		// console.log('match', match);
 		return <div>
 			<h2>Home</h2>
 		</div>
 	},
 	Params = (all) => {
 		const { history, match: { params: { param } } } = all;
-		// // console.log('all', all);
-		// console.log('match', match);
 		return <div>
 			<h2>Params</h2>
 			<h2>{ param }</h2>
@@ -177,19 +158,8 @@ const Home = (all) => {
 	},
 	MyError = (all) => {
 		const { history, match: { params: { param } } } = all;
-		// // console.log('all', all);
-		// console.log('match', match);
 		return <div>
 			<h2>MyError</h2>
-			<h2>{ param }</h2>
-		</div>
-	},
-	Aparts = (all) => {
-		const { history, match: { params: { param } } } = all;
-		// // console.log('all', all);
-		// console.log('match', match);
-		return <div>
-			<h2>Aparts</h2>
 			<h2>{ param }</h2>
 		</div>
 	};
