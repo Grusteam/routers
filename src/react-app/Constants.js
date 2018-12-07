@@ -7,7 +7,7 @@ export const
 		'INPUT_VALUE': {
 			action: 'setInputValue',
 			constant: 'SET_INPUT_VALUE',
-			defaultState: 'input',
+			defaultState: '',
 		},
 	},
 	
